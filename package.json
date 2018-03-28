@@ -1,0 +1,14 @@
+{
+  "name": "robot-bartender",
+  "author": "Jeremy Garcia",
+  "version": "0.1.0",
+  "description": "our cool app",
+  "scripts": {
+    "start": "npm run build & npm run backend",
+    "backend": "cd backend; go run main.go",
+    "build": "webpack -d --config webpack.config.js --watch"
+  },
+  "dependencies": {
+    "webpack": "3.7.1"
+  }
+}
