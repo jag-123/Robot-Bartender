@@ -10,7 +10,10 @@ import (
   "os"
   "os/user"
   "path/filepath"
-  
+
+  "github.com/gin-contrib/static"
+  "github.com/gin-gonic/gin"
+
   "golang.org/x/net/context"
   "golang.org/x/oauth2"
   "golang.org/x/oauth2/google"
@@ -89,7 +92,7 @@ func saveToken(file string, token *oauth2.Token) {
   json.NewEncoder(f).Encode(token)
 }
 
-func main() {
+func returnData() []string {
   ctx := context.Background()
 
   b, err := ioutil.ReadFile("client_secret.json")
@@ -120,16 +123,40 @@ func main() {
     log.Fatalf("Unable to retrieve data from sheet. %v", err)
   }
 
+  var s []string
+
   if len(resp.Values) > 0 {
-    fmt.Println("Recipies:")
     for _, row := range resp.Values {
       // Print columns A and E, which correspond to indices 0 and 4.
-      fmt.Printf("%s\n", row[0])
+      // fmt.Printf("%s\n", row[0])
+      s = append(s, row[0].(string))
     }
   } else {
     fmt.Print("No data found.")
   }
+  return s
+}
 
-  fmt.Println(resp.Values)
+func main() {
 
+  r := Handlers()
+  r.Run(":3000")
+}
+
+func showDrinks(c *gin.Context) {
+  res := returnData()
+
+  c.JSON(200, gin.H{
+    "drinks": res,
+  })
+}
+
+func Handlers() *gin.Engine {
+  r := gin.Default()
+
+  r.GET("/showDrinks", showDrinks)
+
+  r.Use(static.Serve("/", static.LocalFile("../frontend/public", true)))
+
+  return r
 }
